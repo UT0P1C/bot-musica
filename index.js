@@ -5,9 +5,12 @@ const ytdl = require("ytdl-core");
 const TOKEN = "OTQ4OTcyMjczOTg4MTczODQ0.YiDlTQ.9kXP0GR_HYERokZE9bteyxoCA3M";
 
 const prefixo = "$";
+const apenasAudio = {
+	filter: "audioonly"
+}
 
 const servidores = {
-	'server': {
+	"server": {
 		connection: null,
 		dispatcher: null
 	}
@@ -35,7 +38,15 @@ client.on("message", async (msg) => {
 	}
 
 	if(msg.content === prefixo + "vaza"){
-					//$vaza
+		if(msg.member.voice.channel){
+			msg.member.voice.channel.leave();
+			servidores.server.connection = null;
+			servidores.server.dispatcher = null;
+			msg.channel.send("Vazei");
+		}else if(!msg.member.voice.channel){
+			msg.channel.send("nem vc ta ai pra que ta me expulsando desgraça");
+			return;
+		}
 	}
 
 	if(msg.content === prefixo + "ajuda"){
@@ -65,11 +76,11 @@ client.on("message", async (msg) => {
 			if(ytdl.validateURL(music)){
 				servidores.server.connection = await msg.member.voice.channel.join();
 				
-				servidores.server.dispatcher = servidores.server.connection.play(ytdl(music)); //$toca <link>
+				servidores.server.dispatcher = servidores.server.connection.play(ytdl(music, apenasAudio)); //$toca <link>
 
 				msg.channel.send("Toquei");
 			}else{
-				msg.channel.send("link inválido");
+				msg.channel.send("bota link do youtube burro");
 			}
 
 		}else if(!msg.member.voice.channel){
@@ -78,6 +89,27 @@ client.on("message", async (msg) => {
 			return;
 		
 		} 
+	}
+
+	if(msg.content === prefixo + "pausa"){
+		if(msg.member.voice.channel){
+			servidores.server.dispatcher.pause(); // $pausa
+			msg.channel.send("Pausei");
+		}else if(!msg.member.voice.channel){
+			msg.channel.send("Vai pro canal de voz antes de me chamar doente");
+			return;
+		}
+	}
+
+	if(msg.content === prefixo + "volta"){
+		if(msg.member.voice.channel){
+			servidores.server.dispatcher.pause(true);
+			servidores.server.dispatcher.resume(); // $volta
+			msg.channel.send("Voltei");
+		}else if(!msg.member.voice.channel){
+			msg.channel.send("Vai pro canal de voz antes de me chamar doente");
+			return;
+		}
 	}
 
 });
