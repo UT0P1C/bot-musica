@@ -50,7 +50,7 @@ client.on("message", async (msg) => {
 	}
 
 	if(msg.content === prefixo + "ajuda"){
-		msg.channel.send("Comandos atuais: $brota, $pao de cria"); //$ajuda
+		msg.channel.send("Comandos atuais: $brota, $pao de cria, $toca, $vaza, $pausa, $volta"); //$ajuda
 	}
 
 	if(msg.content === prefixo + "pao de cria"){
