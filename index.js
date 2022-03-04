@@ -5,9 +5,13 @@ const ytdl = require("ytdl-core");
 const TOKEN = "OTQ4OTcyMjczOTg4MTczODQ0.YiDlTQ.9kXP0GR_HYERokZE9bteyxoCA3M";
 
 const prefixo = "$";
-const apenasAudio = {
+
+//opções do player
+const ytdlOptions = {
 	filter: "audioonly"
 }
+
+//variável para declarar vários servidores
 
 const servidores = {
 	"server": {
@@ -16,9 +20,13 @@ const servidores = {
 	}
 }
 
+//ligar o bot
+
 client.on("ready", () => {
 	console.log("cheguei nessa porra");
 });
+
+//funções de mensagem
 
 client.on("message", async (msg) => {
 	//filtros
@@ -27,39 +35,48 @@ client.on("message", async (msg) => {
 
 	//comandos
 
+	//chamar o bot para o canal de voz
 	if(msg.content === prefixo + "brota"){
 		if(msg.member.voice.channel){
-			servidores.server.connection = await msg.member.voice.channel.join(); // $brota
-			msg.channel.send("Brotei");
+			try{
+				servidores.server.connection = await msg.member.voice.channel.join(); // $brota
+				msg.channel.send("Brotei");
+			}catch (err) {
+				console.log(err); // erro ao conectar em um canal de voz
+			}
 		}else if(!msg.member.voice.channel){
 			msg.channel.send("Vai pro canal de voz antes de me chamar doente");
 			return;
 		}
 	}
 
+
+	//sair do canal de voz
 	if(msg.content === prefixo + "vaza"){
 		if(msg.member.voice.channel){
 			msg.member.voice.channel.leave();
 			servidores.server.connection = null;
 			servidores.server.dispatcher = null;
-			msg.channel.send("Vazei");
+			msg.channel.send("Vazei"); //$vaza
 		}else if(!msg.member.voice.channel){
 			msg.channel.send("nem vc ta ai pra que ta me expulsando desgraça");
 			return;
 		}
 	}
 
+	//ajuda
 	if(msg.content === prefixo + "ajuda"){
-		msg.channel.send("Comandos atuais: $brota, $pao de cria, $toca, $vaza, $pausa, $volta"); //$ajuda
+		msg.channel.send("Comandos atuais: $vasco, $brota, $pao de cria, $toca, $vaza, $pausa, $volta"); //$ajuda
 	}
 
 	if(msg.content === prefixo + "pao de cria"){
 		msg.channel.send("não, de sal"); // $pao de cria
 	}
 	
+	//tocar o hino do vasco
 	if(msg.content === prefixo + "vasco"){
 		if(msg.member.voice.channel){
-			msg.channel.send("O CAMPEÃO DOS CAMPEÕES!!!!");
+			msg.channel.send("A CRUZ DE MALTA É O MEU PENDÃO");
 			servidores.server.connection = await msg.member.voice.channel.join();
 			servidores.server.connection.play("./vasco.mp3"); //$vasco
 		}else if(!msg.member.voice.channel){
@@ -68,6 +85,17 @@ client.on("message", async (msg) => {
 		} 
 	}
 
+	if(msg.content === prefixo + "fogos"){
+		if(msg.member.voice.channel){
+			servidores.server.connection = await msg.member.voice.channel.join();
+			servidores.server.connection.play("./fogos.mp3"); // $fogos
+		}else if(!msg.member.voice.channel){
+			msg.channel.send("Vai pro canal de voz antes filho da puta");
+			return;
+		}
+	}
+
+	//dar play em uma música
 	if(msg.content.startsWith(prefixo + "toca")){
 		if(msg.member.voice.channel){
 			
@@ -76,7 +104,7 @@ client.on("message", async (msg) => {
 			if(ytdl.validateURL(music)){
 				servidores.server.connection = await msg.member.voice.channel.join();
 				
-				servidores.server.dispatcher = servidores.server.connection.play(ytdl(music, apenasAudio)); //$toca <link>
+				servidores.server.dispatcher = servidores.server.connection.play(ytdl(music, ytdlOptions)); //$toca <link>
 
 				msg.channel.send("Toquei");
 			}else{
@@ -91,6 +119,7 @@ client.on("message", async (msg) => {
 		} 
 	}
 
+	//pausar a música atual
 	if(msg.content === prefixo + "pausa"){
 		if(msg.member.voice.channel){
 			servidores.server.dispatcher.pause(); // $pausa
@@ -101,6 +130,7 @@ client.on("message", async (msg) => {
 		}
 	}
 
+	//voltar a tocar a musica
 	if(msg.content === prefixo + "volta"){
 		if(msg.member.voice.channel){
 			servidores.server.dispatcher.pause(true);
