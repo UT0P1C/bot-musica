@@ -1,22 +1,25 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const ytdl = require("ytdl-core");
+const configs = require("./config.json");
 
-const TOKEN = "OTQ4OTcyMjczOTg4MTczODQ0.YiDlTQ.9kXP0GR_HYERokZE9bteyxoCA3M";
+const google = require("googleapis");
 
-const prefixo = "$";
+const youtube = new google.youtube_v3.Youtube({
+	version: "v3",
+	auth: configs.GOOGLE_API_KEY
+});
 
-//opções do player
-const ytdlOptions = {
-	filter: "audioonly"
-}
+const prefixo = configs.PREFIX;
 
 //variável para declarar vários servidores
 
 const servidores = {
 	"server": {
 		connection: null,
-		dispatcher: null
+		dispatcher: null,
+		row: [],
+		imPlaying: false
 	}
 }
 
@@ -66,7 +69,7 @@ client.on("message", async (msg) => {
 
 	//ajuda
 	if(msg.content === prefixo + "ajuda"){
-		msg.channel.send("Comandos atuais: $vasco, $brota, $pao de cria, $toca, $vaza, $pausa, $volta"); //$ajuda
+		msg.channel.send("Comandos atuais: $vasco, $brota, $pao de cria, $toca, $vaza, $pausa, $volta, $fogos"); //$ajuda
 	}
 
 	if(msg.content === prefixo + "pao de cria"){
@@ -76,8 +79,14 @@ client.on("message", async (msg) => {
 	//tocar o hino do vasco
 	if(msg.content === prefixo + "vasco"){
 		if(msg.member.voice.channel){
-			msg.channel.send("A CRUZ DE MALTA É O MEU PENDÃO");
-			servidores.server.connection = await msg.member.voice.channel.join();
+			msg.channel.send("```A CRUZ DE MALTA É O MEU PENDÃO```");
+			if(servidores.server.connection === null){
+				try{
+					servidores.server.connection = await msg.member.voice.channel.join();
+				}catch (err) {
+					console.log(err); // erro ao conectar em um canal de voz
+				}
+			}
 			servidores.server.connection.play("./vasco.mp3"); //$vasco
 		}else if(!msg.member.voice.channel){
 			msg.channel.send("Vai pro canal de voz antes de me chamar doente");
@@ -85,9 +94,17 @@ client.on("message", async (msg) => {
 		} 
 	}
 
+
+	//soltar fogos de artificio
 	if(msg.content === prefixo + "fogos"){
 		if(msg.member.voice.channel){
-			servidores.server.connection = await msg.member.voice.channel.join();
+			if(servidores.server.connection === null){
+				try{
+					servidores.server.connection = await msg.member.voice.channel.join();
+				}catch (err) {
+					console.log(err); // erro ao conectar em um canal de voz
+				}
+			}
 			servidores.server.connection.play("./fogos.mp3"); // $fogos
 		}else if(!msg.member.voice.channel){
 			msg.channel.send("Vai pro canal de voz antes filho da puta");
@@ -101,14 +118,51 @@ client.on("message", async (msg) => {
 			
 			let music = msg.content.slice(6);
 
-			if(ytdl.validateURL(music)){
-				servidores.server.connection = await msg.member.voice.channel.join();
-				
-				servidores.server.dispatcher = servidores.server.connection.play(ytdl(music, ytdlOptions)); //$toca <link>
+			if(music.length === 0){
+				msg.channel.send("pô meu mano se tu n falar a musica n tem como eu tocar ne");
+				return;
+			}
 
-				msg.channel.send("Toquei");
+			if(servidores.server.connection === null){
+				try{
+					servidores.server.connection = await msg.member.voice.channel.join();
+				}catch (err) {
+					console.log(err); // erro ao conectar em um canal de voz
+				}
+			}
+
+			if(ytdl.validateURL(music)){
+				
+				if(servidores.server.connection === null){
+					try{
+						servidores.server.connection = await msg.member.voice.channel.join();
+					}catch (err) {
+						console.log(err); // erro ao conectar em um canal de voz
+					}
+				}
+				
+				servidores.server.row.push(music); 
+				playMusic(); //toca a musica
+				msg.channel.send("```Adicionado à fila: ```" + result.data.items[0].snippet.title);
+
 			}else{
-				msg.channel.send("bota link do youtube burro");
+				youtube.search.list({
+					q: music,
+					part: "snippet",
+					fields: "items(id(videoId), snippet(title))",
+					type: "video"
+				}, function (err, result) {
+					if(err){
+						console.log(err);
+					}
+					if(result){
+						id = result.data.items[0].id.videoId; //puxar o id da musica pela pesquisa
+						music = "https://www.youtube.com/watch?v=" + id;
+						servidores.server.row.push(music);
+						playMusic(); // toca a musica
+						msg.channel.send("```Adicionado à fila: ```" + result.data.items[0].snippet.title);
+					}
+				});
 			}
 
 		}else if(!msg.member.voice.channel){
@@ -144,4 +198,26 @@ client.on("message", async (msg) => {
 
 });
 
-client.login(TOKEN);
+const playMusic = () => {
+	if(servidores.server.imPlaying === false){
+		const playing = servidores.server.row[0];
+		servidores.server.imPlaying = true;
+		servidores.server.dispatcher = servidores.server.connection.play(ytdl(playing, configs.YTDL)); //$toca
+	
+	
+		servidores.server.dispatcher.on("finish", () => {
+			
+			servidores.server.row.shift();
+			
+			if(servidores.server.row.length > 0){
+				playMusic();
+			}else{
+				servidores.server.dispatcher = null;
+			}
+		
+		});
+	}
+
+}
+
+client.login(configs.DISCORD_TOKEN);
