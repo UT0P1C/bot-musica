@@ -143,24 +143,55 @@ client.on("message", async (msg) => {
 				
 				servidores.server.row.push(music); 
 				playMusic(); //toca a musica
-				msg.channel.send("```Adicionado à fila: ```" + result.data.items[0].snippet.title);
+				msg.channel.send("ADICIONADO À FILA: ```" + result.data.items[0].snippet.title + "```");
 
 			}else{
 				youtube.search.list({
 					q: music,
 					part: "snippet",
-					fields: "items(id(videoId), snippet(title))",
+					fields: "items(id(videoId), snippet(title, channelTitle))",
 					type: "video"
 				}, function (err, result) {
 					if(err){
 						console.log(err);
 					}
 					if(result){
-						id = result.data.items[0].id.videoId; //puxar o id da musica pela pesquisa
-						music = "https://www.youtube.com/watch?v=" + id;
-						servidores.server.row.push(music);
-						playMusic(); // toca a musica
-						msg.channel.send("```Adicionado à fila: ```" + result.data.items[0].snippet.title);
+
+						const resultList = [];
+
+						//organiza a ordem de resultados de uma pesquisa
+						for (let i in result.data.items) {
+							const itemMount = {
+								"videoTitle": result.data.items[i].snippet.title,
+								"channelTitle": result.data.items[i].snippet.channelTitle,
+								"id": result.data.items[i].id.videoId
+							}
+
+							resultList.push(itemMount);
+						}
+
+						//cria a mensagem embed
+						const embed = new Discord.MessageEmbed()
+						.setColor([178,0,255])
+						.setAuthor("MARCELO D2")
+						.setDescription("Escolha a música de 1 a 5");
+
+						for (i in resultList){
+							embed.addField(
+								`${parseInt(i) + 1} - ${resultList[i].videoTitle}`,
+								resultList[i].channelTitle
+							);
+						}
+
+						msg.channel.send(embed)
+							.then((embedMessage) => {
+								const possibleReactions = ["1️⃣","2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+
+								//reação de emojis para escolher a musica
+								for (i in possibleReactions){
+									embedMessage.react(possibleReactions[i]);
+								}
+							});
 					}
 				});
 			}
