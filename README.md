@@ -1,7 +1,12 @@
-BOT DE MUSICA DISCORD EM NODE.JS
+# Bot de musica para o discord
 
-Adicionar API_KEY do google e TOKEN_API do discord em config.json
+bot feito em node.js
+para ver os comandos basta digitar $ajuda
 
-Para rodar: node index.js
+# Como configurar
 
-para os comandos digite $ajuda
+Adicione sua API_KEY do google e o TOKEN_API do discord em config.json
+
+# Como rodar
+
+node index.js
