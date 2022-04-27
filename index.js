@@ -48,7 +48,7 @@ client.on("message", async (msg) => {
 				console.log(err); // erro ao conectar em um canal de voz
 			}
 		}else if(!msg.member.voice.channel){
-			msg.channel.send("Vai pro canal de voz antes de me chamar doente");
+			msg.channel.send("entre em um canal de voz antes de me invocar");
 			return;
 		}
 	}
@@ -62,14 +62,14 @@ client.on("message", async (msg) => {
 			servidores.server.dispatcher = null;
 			msg.channel.send("Vazei"); //$vaza
 		}else if(!msg.member.voice.channel){
-			msg.channel.send("nem vc ta ai pra que ta me expulsando desgraça");
+			msg.channel.send("me invoque no mesmo canal de voz que você");
 			return;
 		}
 	}
 
 	//ajuda
 	if(msg.content === prefixo + "ajuda"){
-		msg.channel.send("Comandos atuais: $vasco, $brota, $pao de cria, $toca, $vaza, $pausa, $volta, $fogos"); //$ajuda
+		msg.channel.send("Comandos atuais: $vasco, $brota, $toca, $vaza, $pausa, $volta, $fogos"); //$ajuda
 	}
 
 	if(msg.content === prefixo + "pao de cria"){
@@ -107,7 +107,7 @@ client.on("message", async (msg) => {
 			}
 			servidores.server.connection.play("./fogos.mp3"); // $fogos
 		}else if(!msg.member.voice.channel){
-			msg.channel.send("Vai pro canal de voz antes filho da puta");
+			msg.channel.send("Vai pro canal de voz antes");
 			return;
 		}
 	}
@@ -198,7 +198,7 @@ client.on("message", async (msg) => {
 
 		}else if(!msg.member.voice.channel){
 			
-			msg.channel.send("Vai pro canal de voz antes de me chamar doente");
+			msg.channel.send("Vai pro canal de voz antes de me chamar ");
 			return;
 		
 		} 
@@ -210,7 +210,7 @@ client.on("message", async (msg) => {
 			servidores.server.dispatcher.pause(); // $pausa
 			msg.channel.send("Pausei");
 		}else if(!msg.member.voice.channel){
-			msg.channel.send("Vai pro canal de voz antes de me chamar doente");
+			msg.channel.send("Vai pro canal de voz antes de me chamar ");
 			return;
 		}
 	}
@@ -222,7 +222,7 @@ client.on("message", async (msg) => {
 			servidores.server.dispatcher.resume(); // $volta
 			msg.channel.send("Voltei");
 		}else if(!msg.member.voice.channel){
-			msg.channel.send("Vai pro canal de voz antes de me chamar doente");
+			msg.channel.send("Vai pro canal de voz antes de me chamar");
 			return;
 		}
 	}
